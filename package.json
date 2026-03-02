@@ -1,0 +1,31 @@
+{
+  "name": "mentoria-api-automation-cypress",
+  "version": "1.0.0",
+  "description": "Projeto base para mentoria de automação de APIs REST com Cypress e IA",
+  "main": "index.js",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:hml": "cypress run --env environment=hml",
+    "lint": "eslint cypress/**/*.js",
+    "lint:fix": "eslint cypress/**/*.js --fix"
+  },
+  "keywords": [
+    "cypress",
+    "api",
+    "automation",
+    "github-copilot",
+    "rest",
+    "javascript"
+  ],
+  "author": "Renato Santana de Oliveira",
+  "license": "ISC",
+  "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
+    "ajv": "^8.12.0",
+    "cypress": "^13.7.0",
+    "cypress-plugin-api": "^2.11.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-cypress": "^2.15.2"
+  }
+}
