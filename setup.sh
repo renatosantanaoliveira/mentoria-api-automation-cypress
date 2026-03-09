@@ -38,9 +38,13 @@ PORT=8000
 # URI do Banco de Dados MongoDB
 DB_URI=mongodb://localhost:27017/ecommerce-api
 
+# Ambiente
+NODE_ENV=development
+
 # Chave secreta para JWT (JSON Web Token)
 JWT_SECRET_KEY=sua-chave-super-secreta
 JWT_EXPIRE_TIME=30d
+JWT_COOKIE_EXPIRES_IN=30
 
 # Configuração de E-mail (ex: Mailtrap para desenvolvimento)
 EMAIL_HOST=sandbox.smtp.mailtrap.io
