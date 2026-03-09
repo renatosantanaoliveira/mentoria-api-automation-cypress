@@ -1,4 +1,5 @@
 describe('Gestão de Inventário - Categorias', () => {
+    const { faker } = require('@faker-js/faker');
     before(() => {
         cy.authApiLogin(
             Cypress.env('userEmail'),
@@ -7,7 +8,7 @@ describe('Gestão de Inventário - Categorias', () => {
     });
 
     it('deve criar uma categoria e validar sua persistência via GET', () => {
-        const categoriaDescricao = 'Hardware Premium';
+        const categoriaDescricao = `Categoria ${faker.commerce.department()} ${Date.now()}`;
 
         cy.categoriesApiCreate({ name: categoriaDescricao }).then((resPost) => {
             expect(resPost.status).to.eq(201);
