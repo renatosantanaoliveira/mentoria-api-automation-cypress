@@ -1,119 +1,122 @@
-# Guia de Onboarding: Automação de APIs REST (Cypress + IA)
+#!/usr/bin/env bash
 
-Bem-vindo(a) à nossa Mentoria! Este diretório contém o kit oficial para iniciar o projeto base E-Commerce que servirá de alvo para os nossos testes automatizados. 
+# Encerra o script se algum comando fundamental falhar
+set -e
 
-Revisamos e simplificamos todo o processo de setup para que você possa focar no que importa: **Testar a API**.
+echo "====================================================="
+echo " Iniciando o setup do projeto E-Commerce RESTFul API "
+echo "====================================================="
+echo ""
 
----
+# 0. Verificações de dependências básicas
+command -v git >/dev/null 2>&1 || { echo >&2 "❌ Erro: O 'git' não está instalado na máquina. Instale e tente novamente."; exit 1; }
+command -v npm >/dev/null 2>&1 || { echo >&2 "⚠️ Aviso: O 'npm' (Node.js) não está instalado. Você precisará instalá-lo para rodar a aplicação."; }
 
-## 🛠️ Pré-requisitos
+# 1. Clonar o repositório
+REPO_DIR="mentoria-ecommerce"
+if [ -d "$REPO_DIR" ]; then
+    echo "⚠️ A pasta '$REPO_DIR' já existe. Pulando a etapa de clone."
+    cd "$REPO_DIR"
+else
+    echo "📦 Clonando o repositório do GitHub..."
+    git clone https://github.com/alin00r/Node.js-Full-E-Commerce-RESTFul-Api-with-Payment.git "$REPO_DIR"
+    cd "$REPO_DIR" || exit
+    echo "✅ Repositório clonado com sucesso."
+fi
 
-Antes de iniciar, garanta que sua máquina tenha as três ferramentas fundamentais:
-1. **[Node.js](https://nodejs.org/)** (versão 14 ou superior)
-2. **[Git](https://git-scm.com/)** (Para usuários de Windows, as ações de terminal abaixo deverão ser feitas no **Git Bash**).
-3. **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** rodando na sua máquina (ícone visível na bandeja do sistema).
+# 2. Criar o arquivo de configuração config.env
+if [ -f config.env ]; then
+    echo "⚠️ O arquivo 'config.env' já existe. Pulando a criação para não sobrescrever."
+else
+    echo "⚙️ Criando o arquivo de configuração config.env..."
+    cat <<EOL > config.env
+# Arquivo de variáveis de ambiente para a aplicação
 
----
-
-## 🚀 Passo 1: O Setup Automático Mágico (Recomendado)
-
-Longe dos tutoriais intermináveis, criamos um script para deixar sua API no ponto em 1 minuto.
-
-Abra o seu terminal (no Windows, **Git Bash**) na pasta deste guia e execute o script de automação:
-
-```bash
-./setup.sh
-```
-
-**O que este script resolve por você:**
-✅ Clona o repositório fonte da API e entra na pasta correta (`mentoria-ecommerce`).
-✅ Verifica e sobe um Banco de Dados MongoDB novinho no contêiner do seu Docker local.
-✅ Cria seu arquivo oculto (`config.env`) que armazena as chaves e rotas da API.
-✅ Instala silenciosamente todas as bibliotecas necessárias (`npm install`).
-✅ (Bônus) Alimenta o banco inicial com produtos / dados dummy rodando o seeder da aplicação, para você não começar num banco vazio!
-
-*(Caso caia a internet ou falhe algum passo, apenas analise o erro vermelho, arrume, e rode o `./setup.sh` novamente. Ele foi feito para não quebrar reinstalando).*
-
----
-
-## ▶️ Passo 2: Rodando a Aplicação
-
-Se a mágica funcionou perfeitamente e apareceu o aviso de *Setup finalizado!*, basta dar a partida no motor:
-
-1. No terminal, entre na nova pasta do código do projeto gerada pelo script:
-   ```bash
-   cd mentoria-ecommerce
-   ```
-2. Inicie o servidor em modo de desenvolvimento contínuo (Assistindo alterações):
-   ```bash
-   npm run start:dev
-   ```
-
-Você deverá ver no console algo parecido com: `App running on port 8000` e `Database Connected Successfully`.
-
----
-
-## ⚙️ Passo 3: Conhecendo seu *config.env*
-
-Dentro da pasta `mentoria-ecommerce`, você verá que um arquivo `config.env` nasceu sozinho. Ele é crucial para a API funcionar. Espie o conteúdo dele:
-
-```ini
+# Porta do servidor
 PORT=8000
+
+# URI do Banco de Dados MongoDB
 DB_URI=mongodb://localhost:27017/ecommerce-api
+
+# Ambiente
 NODE_ENV=development
+
+# Chave secreta para JWT (JSON Web Token)
 JWT_SECRET_KEY=sua-chave-super-secreta
 JWT_EXPIRE_TIME=30d
 JWT_COOKIE_EXPIRES_IN=30
-EMAIL_USER=seu_usuario_mailtrap # Opcional agora (Substituir pela conta real quando precisar)
-EMAIL_PASS=sua_senha_mailtrap # Opcional agora 
-```
-> **Nota de Testes:** Durante a mentoria de Integração com Cypress e IA, quando chegarmos nas aulas de simular pagamentos reais ou recuperar senhas via e-mail, é neste arquivo que nós vamos colar nossas *Keys* fresquinhas criadas no Mailtrap ou Stripe.
 
----
+# Configuração de E-mail (ex: Mailtrap para desenvolvimento)
+EMAIL_HOST=sandbox.smtp.mailtrap.io
+EMAIL_PORT=2525
+EMAIL_USER=seu_usuario_mailtrap
+EMAIL_PASS=sua_senha_mailtrap
+EMAIL_FROM=seuemail@exemplo.com
 
-## 👑 Passo 4: Promover um Administrador (Pós-instalação e Autenticação)
+# Chaves da API do Stripe
+STRIPE_API_KEY=sua_chave_api_stripe
+STRIPE_WEBHOOK_SECRET=sua_chave_webhook_secret_stripe
+EOL
+    echo "✅ Arquivo config.env criado com sucesso."
+fi
 
-Algumas rotas da API (como a de deletar Categorias ou adicionar chaves financeiras) exigirão que o `role` (papel) do usuário atual seja `admin`.
+# 3. Subir o MongoDB via Docker
+echo ""
+echo "🐳 Configurando o banco de dados MongoDB via Docker..."
 
-**Como conseguir seus poderes de Admin rapidamente?**
+if command -v docker >/dev/null 2>&1; then
+    # Verifica se o Docker daemon está rodando
+    if docker info >/dev/null 2>&1; then
+        # Verifica se já existe um container com esse nome
+        if [ "$(docker ps -aq -f name=mongodb-ecommerce)" ]; then
+            echo "⚠️ O container 'mongodb-ecommerce' já existe."
+            # Verifica se o container não está em execução
+            if [ ! "$(docker ps -q -f name=mongodb-ecommerce)" ]; then
+                echo "🔄 Iniciando o container existente..."
+                docker start mongodb-ecommerce
+            else
+                echo "✅ O container já está em execução."
+            fi
+        else
+            echo "🚀 Baixando a imagem (se necessário) e iniciando o container do MongoDB..."
+            docker run -d -p 27017:27017 --name mongodb-ecommerce mongo
+            echo "✅ Banco de dados MongoDB rodando na porta 27017."
+        fi
+    else
+        echo "⚠️ O Docker está instalado na sua máquina, mas o Docker Desktop (daemon) parece estar fechado."
+        echo "   👉 Recomendação: Abra o Docker Desktop e depois inicie o container manualmente com:"
+        echo "      docker run -d -p 27017:27017 --name mongodb-ecommerce mongo"
+    fi
+else
+    echo "⚠️ O Docker não foi encontrado na sua máquina."
+    echo "   👉 Você precisará instalar o MongoDB localmente ou usar um cluster no MongoDB Atlas para continuar."
+fi
 
-1. **Crie a conta via API (Use Postman, Insomnia ou o próprio Cypress)**:
-   - Requisição: **`POST`** `http://localhost:8000/api/v1/auth/signup`
-   - Corpo (JSON):
-     ```json
-     {
-       "name": "Admin da Mentoria",
-       "email": "admin@mentoria.com",
-       "password": "senhaforte123",
-       "passwordConfirm": "senhaforte123"
-     }
-     ```
+# 4. Instalar as dependências e tentar rodar as seeds
+echo ""
+echo "🔧 Instalando dependências (npm install)..."
+if command -v npm >/dev/null 2>&1; then
+    # Desativamos o 'set -e' temporariamente, caso o npm install retorne algum erro não grave
+    set +e
+    npm install
+    
+    echo ""
+    echo "🌱 Injetando dados iniciais no banco (seeder)..."
+    (cd utils/dummyData && node seeder.js -i)
+    set -e
+else
+    echo "⚠️ Pulando a instalação de dependências pois o comando 'npm' não foi encontrado."
+fi
 
-2. **Use o banco para promover essa conta cadastrada:**
-   Deixe a API rodando e abra um **novo terminal** na sua máquina para invadir gentilmente o container do seu Mongo:
-   ```bash
-   docker exec -it mongodb-ecommerce mongosh
-   ```
-   Lá dentro (o painel de comando vai mudar p/ o mongosh), digite estes 3 passos sequencialmente e dê "Enter" após cada um:
-   ```javascript
-   use ecommerce-api
-   
-   db.users.updateOne( { "email": "admin@mentoria.com" }, { $set: { "role": "admin" } } )
-   
-   exit
-   ```
-
-3. **Pronto! Prove seu valor e pegue seu Token:**
-   - Requisição: **`POST`** `http://localhost:8000/api/v1/auth/login` (enviando `email` e `password`)
-   - Você receberá um `token` enorme contendo suas credenciais de superusuário! Basta colar ele nas requisições da plataforma.
-
----
-
-## 📚 Documentação (Swagger)
-
-A API vem com a interface de documentação inteira pronta.
-Para ler as rotas, os `Payloads` (Corpos de Envios) permitidos, métodos REST disponíveis, visite o painel: 
-
-👉 **[http://localhost:8000/api-docs](http://localhost:8000/api-docs)**
-
-Te vejo na primeira aula de mentoria com tudo rodando! 🚀
+echo ""
+echo "🎉 Setup finalizado com sucesso! 🎉"
+echo "--------------------------------------------------------"
+echo "⚠️ ATENÇÃO: Caso precise, atualize o 'config.env' preenchendo as chaves do Stripe, JWT ou Mailtrap."
+echo ""
+echo "Para testar se tudo deu certo, rode os comandos abaixo:"
+echo ""
+echo "  1. Entre na pasta: cd $REPO_DIR"
+echo "  2. Inicie a API:   npm run start:dev"
+echo ""
+echo "Acesse no navegador ou Postman: http://localhost:8000"
+echo "--------------------------------------------------------"
