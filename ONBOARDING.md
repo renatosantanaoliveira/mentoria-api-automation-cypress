@@ -60,8 +60,10 @@ Dentro da pasta `mentoria-ecommerce`, você verá que um arquivo `config.env` na
 ```ini
 PORT=8000
 DB_URI=mongodb://localhost:27017/ecommerce-api
+NODE_ENV=development
 JWT_SECRET_KEY=sua-chave-super-secreta
 JWT_EXPIRE_TIME=30d
+JWT_COOKIE_EXPIRES_IN=30
 EMAIL_USER=seu_usuario_mailtrap # Opcional agora (Substituir pela conta real quando precisar)
 EMAIL_PASS=sua_senha_mailtrap # Opcional agora 
 ```
