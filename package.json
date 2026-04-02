@@ -8,7 +8,9 @@
     "cypress:run": "cypress run",
     "cypress:run:hml": "cypress run --env environment=hml",
     "lint": "eslint cypress/**/*.js",
-    "lint:fix": "eslint cypress/**/*.js --fix"
+    "lint:fix": "eslint cypress/**/*.js --fix",
+    "seed:users": "node scripts/seed-users.js",
+    "seed:users:dry": "node scripts/seed-users.js --dry"
   },
   "keywords": [
     "cypress",
@@ -23,9 +25,12 @@
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
     "ajv": "8.12.0",
+    "ajv-formats": "^3.0.1",
+    "bcryptjs": "^3.0.3",
     "cypress": "15.13.0",
     "cypress-plugin-api": "^2.11.1",
     "eslint": "^8.57.0",
-    "eslint-plugin-cypress": "^2.15.2"
+    "eslint-plugin-cypress": "^2.15.2",
+    "mongoose": "^9.3.3"
   }
 }

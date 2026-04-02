@@ -1,0 +1,21 @@
+name: Cypress API Tests
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Executar testes com gravação no Cypress Cloud
+        run: npx cypress run --record --key ${{ secrets.CYPRESS_RECORD_KEY }}

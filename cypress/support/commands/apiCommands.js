@@ -58,3 +58,28 @@ Cypress.Commands.add('categoriesApiCreate', (body) => categoriesApi.create(body)
  * @example cy.ordersApiCreate('cartId123', { street: 'Rua A', city: 'Cidade' })
  */
 Cypress.Commands.add('ordersApiCreate', (cartId, shippingAddress) => ordersApi.create(cartId, shippingAddress));
+
+// ─── Contract Validation ───────────────────────────────────────────────────────
+
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+
+const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
+
+/**
+ * Valida um objeto de dados contra um JSON Schema usando AJV.
+ * Falha o teste com mensagem detalhada se a validação não passar.
+ * @param {Object} schema - JSON Schema a ser utilizado na validação.
+ * @param {Object} data - Dados a serem validados (ex: response.body).
+ * @example cy.validateContract(categoriesSchema, response.body)
+ */
+Cypress.Commands.add('validateContract', (schema, data) => {
+    const validate = ajv.compile(schema);
+    const valid = validate(data);
+
+    if (!valid) {
+        const errors = ajv.errorsText(validate.errors, { separator: '\n  - ' });
+        throw new Error(`Violação de contrato de schema:\n  - ${errors}`);
+    }
+});
