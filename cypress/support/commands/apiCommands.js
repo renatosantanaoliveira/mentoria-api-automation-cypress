@@ -1,6 +1,7 @@
 import productsApi from '../api/productsApi';
 import authApi from '../api/authApi';
 import categoriesApi from '../api/categoriesApi';
+import ordersApi from '../api/ordersApi';
 
 // ─── Products ─────────────────────────────────────────────────────────────────
 
@@ -49,3 +50,11 @@ Cypress.Commands.add('categoriesApiGetById', (id) => categoriesApi.getById(id));
  * @example cy.categoriesApiCreate({ name: 'Hardware' })
  */
 Cypress.Commands.add('categoriesApiCreate', (body) => categoriesApi.create(body));
+
+// ─── Orders ────────────────────────────────────────────────────────────────────
+
+/**
+ * Cria um novo pedido a partir de um carrinho.
+ * @example cy.ordersApiCreate('cartId123', { street: 'Rua A', city: 'Cidade' })
+ */
+Cypress.Commands.add('ordersApiCreate', (cartId, shippingAddress) => ordersApi.create(cartId, shippingAddress));
