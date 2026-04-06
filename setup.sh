@@ -103,6 +103,11 @@ if command -v npm >/dev/null 2>&1; then
     echo ""
     echo "🌱 Injetando dados iniciais no banco (seeder)..."
     (cd utils/dummyData && node seeder.js -i)
+
+    echo ""
+    echo "👤 Provisionando usuários de teste (admin, manager, user)..."
+    cd ..
+    npm run seed:users
     set -e
 else
     echo "⚠️ Pulando a instalação de dependências pois o comando 'npm' não foi encontrado."

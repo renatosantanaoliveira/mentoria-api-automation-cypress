@@ -2,6 +2,7 @@ const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
   e2e: {
+    projectId: "vuk82x",
     // URL base da API. Sobrescrita automaticamente pelo arquivo de configuração do ambiente.
     // Exemplo de uso nos testes: cy.request('/users') -> chama baseUrl + /users
     baseUrl: "http://localhost:8000/api/v1",
